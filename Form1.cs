@@ -15,30 +15,48 @@ namespace ClientServer
 
         private void button1_Click(object sender, EventArgs e)
         {
-            this.Dispose();
+            this.Dispose(); // Fecha a aplicação
         }
 
 
+        private void btn_connect_Click(object sender, EventArgs e)
+        {
+            if (ip.Text.Length > 2 && port.Text.Length > 2 && menssage.Text.Length > 0)
+            {
+                if (conectionToServer(ip.Text, int.Parse(port.Text), menssage.Text)) // Verificar se a conexão foi um sucesso e envia a mensagem
+                {
+                    MessageBox.Show("Mensagem enviada com sucesso!", "UFAH!", MessageBoxButtons.OK, MessageBoxIcon.Information);
+                    status.Text = "Status -> Mensagem enviada";
+                    menssage.Text = "";
+                }
+            }
+            else
+            {
+                MessageBox.Show("Preencha todos os campos!!", "ERROR", MessageBoxButtons.OK, MessageBoxIcon.Error);
+            }
+        }
 
-        public bool conectionToServer(string ip, int port)
+        public bool conectionToServer(string ip, int port, string message)
         {
             try
             {
-                Socket socket = new Socket(AddressFamily.InterNetwork, SocketType.Stream, ProtocolType.Tcp);
-                socket.Connect(IPAddress.Parse(ip), port);
+                Socket clientSocket = new Socket(AddressFamily.InterNetwork, SocketType.Stream, ProtocolType.Tcp); // Configura o Socket
+                clientSocket.Connect(ip, port); // Conecta no Socket
 
+
+                string messageToSend = message; 
+                byte[] messageBytes = Encoding.UTF8.GetBytes(messageToSend); // Envia a mensagem para o servidor que é mostrado no cmd
+                clientSocket.Send(messageBytes); // Envia a mensagem
+
+
+                clientSocket.Close(); // Fecha a conexão com o host
+                return true;
             }
             catch (Exception ex)
             {
                 MessageBox.Show("O erro foi -> " + ex.Message, "ERROR", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                return false;
             }
-
-            return false;
-        }
-
-        private void btn_connect_Click(object sender, EventArgs e)
-        {
-            conectionToServer("127.0.0.1", 8089);
         }
     }
 }
